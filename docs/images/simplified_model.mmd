@@ -1,0 +1,31 @@
+graph LR
+
+subgraph "Simplified Model"
+    A[Application]:::entity
+    B[BusinessTerm]:::entity
+    BA[BusinessAttribute]:::entity
+    DE[DataElement]:::entity
+    DS[DataSet]:::entity
+    BP[BusinessProcess]:::entity
+    BKA[BusinessKeyActivity]:::entity
+    PS[ProcessSteward]:::entity
+    LOB[LineOfBusiness]:::entity
+    TLC[TradeLifecycle]:::entity
+
+    A -- IMPACTS --> A
+    A -- CONSUMED_BY --> DS
+    A -- CREATED_BY --> DS
+    B -- PART_OF --> BA
+    BA -- MAPS_TO --> DE
+    DE -- BELONGS_TO --> DS
+    BP -- CONSUMED_BY --> DS
+    BP -- CREATED_BY --> DS
+    BP -- PART_OF --> BKA
+    LOB -- DEPENDS_ON --> BP
+    TLC -- HAS_STAGE --> BP
+    PS -- RESPONSIBLE_FOR --> BP    
+end
+
+classDef entity fill:#f9f9f9,stroke:#333,stroke-width:1px;
+classDef relation fill:#EFEFEF,stroke:#666,stroke-width:1px;
+

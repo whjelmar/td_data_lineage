@@ -1,0 +1,1162 @@
+---
+title: "FI Data Lineage Model"
+author: "Walter Hjelmar <walter.hjelmar@synechron.com>"
+toc: true
+number-sections: false
+highlight-style: github
+code-fold: true
+code-overflow: wrap
+code-copy: true
+code-link: true
+code-tools: true
+code-line-numbers: true
+code-block-bg: false
+code-block-border-left: "#35B234"
+format: 
+  html: 
+    embed-resources: true
+    anchor-sections: true
+    code-fold: true
+    css: assets/css/main.css
+    linkcolor: "#35B234"
+    link-external-icon: true
+    link-external-newwindow: true
+    html-math-method: katex
+    theme: cosmo
+    fontsize: 1.1em
+    linestretch: 1.7
+  pdf: 
+    geometry: 
+      - top=30mm
+      - left=20mm
+  docx: default
+---
+
+# Fixed Income - Data Lineage Model Documentation
+
+This data lineage model is designed to track the flow of data across systems, applications, and business processes in a financial services trading firm. The model includes nodes and relationships that cover data governance, regulations and compliance, data quality, and data security.
+
+## Core model concepts
+
+### Nodes
+
+- **[Application](#application)**: Represents systems or applications that are part of the data flow.
+- **[BusinessAttribute](#businessattribute)**: Represents attributes of a BusinessTerm (e.g., Customer ID, Customer Name, Email).
+- **[BusinessKeyActivity](#businesskeyactivity)**: Represents a sub-step of a BusinessProcess.
+- **[BusinessProcess](#sec-BusinessProcess)**: Represents activities or sets of activities that accomplish a specific organizational goal.
+- **[BusinessTerm](#sec-BusinessTerm)**: Represents an entity or object that a BusinessProcess operates on (e.g., Customer).
+- **[ComplianceOfficer](#sec-ComplianceOfficer)**: Represents an individual responsible for ensuring regulatory compliance and overseeing the firm's adherence to data governance policies.
+- **[CompliancePolicy](#sec-CompliancePolicy)**: Represents the firm's internal compliance policies and guidelines.
+- **[DataAsset](#@sec-DataElement)**: Represents a data asset, such as a table, file, or database.
+- **[DataClassification](#sec-DataClassification)**: Represents a logical grouping of types DataElements (e.g. email address, phone number, country code).
+- **[DataConfidentiality](#sec-DataConfidentiality)**: Represents data security classification levels (e.g., Confidential, Restricted, Public).
+- **[DataElement](#sec-DataElement)**: Represents the implementation of a BusinessAttribute in a DataSet (e.g., a field in a table).
+- **[DataQualityIssue](#sec-DataQualityIssue)**: Represents identified data quality problems or violations.
+- **[DataQualityMetric](#sec-DataQualityMetric)**: Represents quantifiable measures of data quality, such as completeness, accuracy, or timeliness.
+- **[DataQualityRule](#sec-DataQualityRule)**: Represents rules that define data quality expectations and requirements.
+- **[DataSet](#sec-DataSet)**: Represents a logical aggregation of DataElements for common use.
+- **[LineOfBusiness](#sec-LineOfBusiness)**: Represents an organizational unit of the business.
+- **[ProcessSteward](#sec-ProcessSteward)**: Represents the process equivalent of the data steward.
+- **[Regulation](#sec-Regulation)**: Represents specific regulatory requirements applicable to the financial services industry (e.g., GDPR, MiFID II, Dodd-Frank).
+- **[SystemOfRecord](#sec-SystemOfRecord)**: Represents the authoritative data source for a given data element or piece of information.
+- **[TradeLifecycle](#sec-TradeLifecycle)**: Represents the different stages that a trade goes through, from placement to settlement.
+- **[Transformation](#sec-Transformation)**: Represents a data transformation process or job.Represents a data transformation process or job.
+
+### Relationships
+
+- **[APPLIES_TO](#sec-APPLIES_TO)**: Connects a DataQualityRule to a DataElement or DataSet that it applies to.
+- **[CLASSIFIED_AS](#sec-CLASSIFIED_AS)**: Connects a DataSet to a DataConfidentiality, indicating its security classification level.
+- **[CONSUMED_BY](#sec-CONSUMED_BY)**: Connects a DataSet (source data) to an Application or BusinessProcess that consumes the data without creating or transforming it.
+- **[CREATED_BY](#sec-CREATED_BY)**: Connects a DataSet (output data) to an Application or BusinessProcess that creates or transforms the data.
+- **[GOVERNED_BY](#sec-GOVERNED_BY)**: Connects a DataElement, DataSet, or CompliancePolicy to a Regulation, indicating which regulatory requirements apply.
+- **[IMPACTS](#sec-IMPACTS)**: Connects Applications to show the downstream impact of changes.
+- **[MAPS_TO](#sec-MAPS_TO)**: Connects a BusinessAttribute to a DataElement.
+- **[MEASURES](#sec-MEASURES)**: Connects a DataQualityMetric to a DataElement or DataSet that it measures.
+- **[PART_OF](#sec-PART_OF)**: Connects a BusinessAttribute to its corresponding BusinessTerm.
+- **[PRODUCES](#sec-PRODUCES)**: Connects a SystemOfRecord to a DataSet that it produces as output.
+- **[RESPONSIBLE_FOR](#sec-RESPONSIBLE_FOR)**: Connects a ProcessSteward, ComplianceOfficer, or DataSteward to a BusinessProcess, Regulation, CompliancePolicy, or DataAsset, indicating their responsibility for ensuring compliance, data governance, or process oversight.
+- **[UTILIZES](#sec-UTILIZES)**: Connects a BusinessProcess to an Application that is used to accomplish the process.
+- **[VIOLATES](#sec-VIOLATES)**: Connects a DataQualityIssue to a DataElement, DataSet, DataQualityRule, or DataQualityMetric that it violates.
+
+## Model Diagrams
+
+### Full model diagram
+
+The model that we have created is of a higher fidelity than the data that we currently have access to, but to get a sense of the scope of the model, we
+present a graph that contains the full model for contextualization.
+
+
+```{mermaid}
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'background': '#000'
+      'primaryColor': '#BB2528',
+      'primaryTextColor': '#fff',
+      'primaryBorderColor': '#7C0000',
+      'lineColor': '#F8B229',
+      'secondaryColor': '#006100',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+%%| label: fig-full-model
+%%| fig-width: 7
+%%| fig-cap: |
+%%|   The complete model for data lineage that we can expand into when ready.  We will use a simplified version to start with
+%%|   We will use a simplified version to start with and improve as the qualtity of the data we have access to increases.
+%%| 
+graph LR
+subgraph "Full Model"
+    A[Application]:::entity
+    BA[BusinessAttribute]:::entity
+    BKA[BusinessKeyActivity]:::entity
+    BP[BusinessProcess]:::entity
+    BT[BusinessTerm]:::entity
+    CO[ComplianceOfficer]:::entity
+    CP[CompliancePolicy]:::entity
+    DC[DataClassification]:::entity
+    DE[DataElement]:::entity
+    DQI[DataQualityIssue]:::entity
+    DQM[DataQualityMetric]:::entity
+    DQR[DataQualityRule]:::entity
+    DS[DataSet]:::entity
+    LOB[LineOfBusiness]:::entity
+    PS[ProcessSteward]:::entity
+    R[Regulation]:::entity
+    SR[SystemOfRecord]:::entity
+    TLC[TradeLifecycle]:::entity
+
+  A --IMPACTS--> A
+  DS --CONSUMED_BY--> A
+  DS --CREATED_BY--> A
+  A --UTILIZES--> BP
+  BA --MAPS_TO--> DE
+  BA --PART_OF--> BT
+  BKA --PART_OF--> BP
+  BP --CONSUMED_BY--> DS
+  BP --CREATED_BY--> DS
+  BP --GOVERNED_BY--> CP
+  BP --GOVERNED_BY--> R
+  BP --HAS_STAGE--> TLC
+  CO --RESPONSIBLE_FOR--> CP
+  CO --RESPONSIBLE_FOR--> DS
+  CO --RESPONSIBLE_FOR--> R
+  CP --APPLIES_TO--> DS
+  CP --APPLIES_TO--> DE
+  CP --GOVERNED_BY--> R
+  DC --CLASSIFIED_AS--> DS
+  DE --BELONGS_TO--> DS
+  DE --GOVERNED_BY--> R
+  DE --MEASURES--> DQM
+  DE --VIOLATES--> DQI
+  DE --VIOLATES--> DQR
+  DE --VIOLATES--> DQM
+  DS --GOVERNED_BY--> R
+  DS --PRODUCES--> SR
+  DQM --VIOLATES--> DQI
+  DQM --VIOLATES--> DQR
+  DQI --VIOLATES--> DQR
+  DQR --APPLIES_TO--> DS
+  DQR --APPLIES_TO--> DE
+  LOB --CONTAINS--> BP
+  PS --RESPONSIBLE_FOR--> BP
+
+classDef entity fill:#f9f9f9,stroke:#333,stroke-width:1px;
+classDef relation fill:#EFEFEF,stroke:#666,stroke-width:1px;
+
+end
+
+
+```
+
+### Simplified model diagram
+
+Here is the simplified version of the model that will be used as the version 1, Minimal Viable Product, of the model.
+
+```{mermaid}
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'background': '#000'
+      'primaryColor': '#BB2528',
+      'primaryTextColor': '#fff',
+      'primaryBorderColor': '#7C0000',
+      'lineColor': '#F8B229',
+      'secondaryColor': '#006100',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+%%| label: fig-simple-model
+%%| fig-width: 7
+%%| fig-cap: |
+%%|   The simplified model for data lineage that we will start with and improve as the qualtity of the data we have access to increases.
+%%| 
+graph LR
+subgraph "Simplified Model"
+
+    A[Application]:::entity
+    BA[BusinessAttribute]:::entity
+    BKA[BusinessKeyActivity]:::entity
+    BP[BusinessProcess]:::entity
+    BT[BusinessTerm]:::entity
+    DE[DataElement]:::entity
+    DS[DataSet]:::entity
+    LOB[LineOfBusiness]:::entity
+    PS[ProcessSteward]:::entity
+    TLC[TradeLifecycle]:::entity
+
+  A --IMPACTS--> A
+  DS --CONSUMED_BY--> A
+  DS --CREATED_BY--> A
+  A --UTILIZES--> BP
+  BA --MAPS_TO--> DE
+  BA --PART_OF--> BT
+  BKA --PART_OF--> BP
+  BP --CONSUMED_BY--> DS
+  BP --CREATED_BY--> DS
+  BP --HAS_STAGE--> TLC
+  DE --BELONGS_TO--> DS
+  LOB --CONTAINS--> BP
+  PS --RESPONSIBLE_FOR--> BP
+
+classDef entity fill:#f9f9f9,stroke:#333,stroke-width:1px;
+classDef relation fill:#EFEFEF,stroke:#666,stroke-width:1px;
+
+end
+
+
+```
+
+ 
+end
+
+
+```
+
+## Node Definitions
+
+/////////////////////////////////////////////////////////////////////////////
+
+### Application
+
+Represents a system or application that is used to process data.
+
+#### **Properties**
+
+- id
+- name
+
+#### **Relationships** 
+
+
+```{mermaid}
+%%| label: fig-application-relationships
+%%| fig-width: 7
+%%| fig-cap: |
+%%|   Application Relationships
+graph LR
+
+subgraph "Application Relationships"
+    A[Application]:::entity
+    BP[BusinessProcess]:::entity
+    DS[DataSet]:::entity
+
+  A --IMPACTS--> A
+  BP --UTILIZES--> A
+  DS --CONSUMED_BY--> A
+  DS --CREATED_BY--> A
+
+classDef entity fill:#f9f9f9,stroke:#333,stroke-width:1px;
+classDef relation fill:#EFEFEF,stroke:#666,stroke-width:1px;
+
+end
+
+```
+
+
+- [CONSUMED_BY](#consumed_by) - Connects a [DataAsset](#dataasset) (source data) to an [Application](#application) or [BusinessProcess](#businessprocess)  
+- [IMPACTS](#impacts) - Connects an [Application](#application) to other related assets, such as other [Application](#application), [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [UTILIZES](#utilizes) - Connects a [BusinessProcess](#businessprocess) to an [Application](#application)
+
+#### **Example** 
+
+``` cypher
+
+(app:Application {
+    id: 'app1',
+    name: 'NAPA'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### BusinessAttribute
+
+Represents a property or characteristic of a BusinessTerm.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [HAS_ATTRIBUTE](#has_attribute) - Connects a [BusinessTerm](#businessterm) node to a [BusinessAttribute](#businessattribute)
+- [MAPS_TO](#MAPS_TO) - Connects a [BusinessAttribute](#businessattribute) node to a [DataElement](#dataelement) node
+
+#### **Example** 
+
+``` cypher
+
+(ba:BusinessAttribute {
+    id: : 'ba1',
+    name: 'Customer ID',
+    description: 'Unique     id:  for a customer'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### BusinessProcess
+
+Represents a business process or set of activities that accomplish a specific organizational goal.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [CONSUMED_BY](#consumed_by) - Connects a [DataAsset](#dataasset) (source data) to an [Application](#application) or [BusinessProcess](#businessprocess)  
+- [INVOLVES](#involves) - Connects a [BusinessProcess](#businessprocess) node to a [DataAsset](#dataasset) node or a  [Transformation](#transformation) node
+- [MANAGES_PROCESS](#MANAGES_PROCESS) - Connects a [ProcessSteward](#processsteward) node to a [BusinessProcess](#businessprocess) node
+- [UTILIZES](#utilizes) - Connects a [BusinessProcess](#businessprocess) to an [Application](#application)
+
+#### **Example** 
+
+``` cypher
+
+(bp:BusinessProcess {
+    id: 'bp1',
+    name: 'Customer Onboarding',
+    description: 'Process for onboarding new customers'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### BusinessTerm
+
+Represents an entity or object that a BusinessProcess operates on.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [HAS_ATTRIBUTE](#has_attribute) - Connects a [BusinessTerm](#businessterm) node to a [BusinessAttribute](#businessattribute)
+
+#### **Example** 
+
+``` cypher
+
+(bt:BusinessTerm {
+    id: : 'bt1',
+    name: 'Customer',
+    description: 'A customer entity in the organization'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### ComplianceOfficer
+
+Represents an individual responsible for ensuring regulatory compliance and overseeing the firm's adherence to data governance policies.
+
+#### **Properties**
+
+- id
+- name
+- title
+
+#### **Relationships** 
+
+- [RESPONSIBLE_FOR](#responsible_for) - Connects a [ComplianceOfficer](#complianceofficer) to a [Regulation](#regulation), [CompliancePolicy](#compliancepolicy), or [DataAsset](#dataasset)
+
+#### **Example** 
+
+``` cypher
+
+(co:ComplianceOfficer {
+    id: : 'co1',
+    name: 'John Doe',
+    title: 'Chief Compliance Officer'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### CompliancePolicy
+
+Represents the firm's internal compliance policies and guidelines.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [GOVERNED_BY](#governed_by) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [Regulation](#regulation) or [CompliancePolicy](#compliancepolicy)
+- [RESPONSIBLE_FOR](#responsible_for) - Connects a [ComplianceOfficer](#complianceofficer) to a [Regulation](#regulation), [CompliancePolicy](#compliancepolicy), or [DataAsset](#dataasset)
+
+#### **Example** 
+
+``` cypher
+
+(cp:CompliancePolicy {
+    id: : 'cp1',
+    name: 'Data Retention Policy',
+    description: 'Policy for data retention and disposal'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataAsset
+
+Represents a data asset, such as a table, file, or database. A type of asset that represents details of organizational data in two layers. One layer is independent of any particular technology for non-technical stakeholder communication. The other one is taking the implementation system for technical stakeholder communication into account. 
+
+#### **Properties**
+
+- id
+- name
+- description
+- type
+
+#### **Relationships** 
+
+- [ACCOUNTABLE_FOR](#accountable_for) - Connects a [SystemOfRecord](#systemofrecord) node to a [DataAsset](#dataasset) node
+- [APPLIES](#applies) - Connects a [DataQualityRule](#dataqualityrule) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [CLASSIFIED_AS](#classified_as) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [DataClassification](#dataclassification)
+- [CONSUMED_BY](#consumed_by) - Connects a [DataAsset](#dataasset) (source data) to an [Application](#application) or [BusinessProcess](#businessprocess)  
+- [CONTAINS](#contains) - Connects a [DataAsset](#dataasset) node to a [DataElement](#dataelement) node.
+- [DERIVED_FROM](#derived_from) - Connects a [DataAsset](#dataasset) (representing the view) to another [DataAsset](#dataasset) (representing the source data)
+- [GOVERNED_BY](#governed_by) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [Regulation](#regulation) or [CompliancePolicy](#compliancepolicy)
+- [MEASURES](#measures) - Connects a [DataQualityMetric](#dataqualitymetric) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- - [RESPONSIBLE_FOR](#accountable_for) - Connects a [DataSteward](#datasteward) node to a [DataAsset](#dataasset) node
+- [RESPONSIBLE_FOR](#responsible_for) - Connects a [ComplianceOfficer](#complianceofficer) to a [Regulation](#regulation), [CompliancePolicy](#compliancepolicy), or [DataAsset](#dataasset)
+- [VIOLATES](#violates) - Connects a [DataQualityIssue](#dataqualityissue) to a [DataQualityRule](#DataQualityRule), [DataQualityMetric](#dataqualitymetric), [DataAsset](#dataasset), or [DataElement](#dataelement)
+
+#### **Example** 
+
+``` cypher
+
+(d:DataAsset {
+  identifier: 'table1', 
+  name: 'Table 1', 
+  description: 'Sales data', 
+  type: 'table'
+})
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataClassification
+
+Represents data security classification levels (e.g.,
+    Confidential,
+    Restricted,
+    Public).
+
+#### **Properties**
+
+- id
+- name
+- description
+
+##### **Relationships** 
+
+- [CLASSIFIED_AS](#classified_as) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [DataClassification](#dataclassification)
+
+#### **Example** 
+
+``` cypher
+
+(dc:DataClassification {
+    id: : 'dc1',
+    name: 'Confidential',
+    description: 'Highly sensitive data requiring strict access control'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataElement {#sec-DataElement}
+
+Represents a field (column) within a data asset.
+
+#### **Properties**
+
+- id
+- name
+- description
+- dataType
+
+#### **Relationships** 
+
+- [APPLIES](#applies) - Connects a [DataQualityRule](#dataqualityrule) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [CLASSIFIED_AS](#classified_as) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [DataClassification](#dataclassification)
+- [CONTAINS](#contains) - Connects a [DataAsset](#dataasset) node to a [DataElement](#dataelement) node.
+- [GENERATED_BY](#generated_by)- Connects a [DataElement](#dataelement) node to a [Transformation](#transformation) node
+- [GOVERNED_BY](#governed_by) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [Regulation](#regulation) or [CompliancePolicy](#compliancepolicy)
+- [IMPACTS](#impacts) - Connects an [Application](#application) to other related assets, such as other [Application](#application), [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [MAPS_TO](#MAPS_TO) - Connects a [BusinessAttribute](#businessattribute) node to a [DataElement](#dataelement) node
+- [MEASURES](#measures) - Connects a [DataQualityMetric](#dataqualitymetric) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [TRANSFORMS_TO](#transforms_to) - Connects a [[DataElement](#dataelement) node to another [DataElement](#dataelement) node
+- [VIOLATES](#violates) - Connects a [DataQualityIssue](#dataqualityissue) to a [DataQualityRule](#DataQualityRule), [DataQualityMetric](#dataqualitymetric), [DataAsset](#dataasset), or [DataElement](#dataelement)
+
+#### **Example** 
+
+``` cypher
+
+(de:DataElement {
+  identifier: 'column1', 
+  name: 'CustomerID', 
+  description: 'Unique customer identifier', 
+  dataType: 'integer’
+})
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataQualityIssue
+
+Represents identified data quality problems or violations.
+
+#### **Properties**
+
+- id
+- description
+- severity
+  
+#### **Relationships** 
+
+- [VIOLATES](#violates) - Connects a [DataQualityIssue](#dataqualityissue) to a [DataQualityRule](#DataQualityRule), [DataQualityMetric](#dataqualitymetric), [DataAsset](#dataasset), or [DataElement](#dataelement)
+
+#### **Example** 
+
+``` cypher
+
+(dqi:DataQualityIssue {
+    id: : 'dqi1',
+    description: 'Missing customer email',
+    severity: 'Medium'
+})
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataQualityMetric
+
+Represents quantifiable measures of data quality,
+    such as completeness,
+    accuracy,
+    or timeliness.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [MEASURES](#measures) - Connects a [DataQualityMetric](#dataqualitymetric) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [VIOLATES](#violates) - Connects a [DataQualityIssue](#dataqualityissue) to a [DataQualityRule](#DataQualityRule), [DataQualityMetric](#dataqualitymetric), [DataAsset](#dataasset), or [DataElement](#dataelement)
+
+#### **Example** 
+
+``` cypher
+
+(dqm:DataQualityMetric {
+    id: : 'dqm1',
+    name: 'Accuracy',
+    description: 'Measure of data accuracy'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataQualityRule
+
+Represents rules that define data quality expectations and requirements.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [APPLIES](#applies) - Connects a [DataQualityRule](#dataqualityrule) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [VIOLATES](#violates) - Connects a [DataQualityIssue](#dataqualityissue) to a [DataQualityRule](#DataQualityRule), [DataQualityMetric](#dataqualitymetric), [DataAsset](#dataasset), or [DataElement](#dataelement)
+
+#### **Example** 
+
+``` cypher
+
+(dqr:DataQualityRule {
+    id: : 'dqr1',
+    name: 'Completeness Rule',
+    description: 'Rule to ensure data completeness'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataSet
+
+A collection of related sets of data assets that are data elements or composed of data elements.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships**
+
+- [ACCOUNTABLE_FOR](#accountable_for) - Connects a [SystemOfRecord](#systemofrecord) node to a [DataAsset](#dataasset) node
+- [AGGREGATES](#aggregates) - Connects a [DataSet](#dataset) node to a [DataElement](#dataelement)
+- [APPLIES](#applies) - Connects a [DataQualityRule](#dataqualityrule) to a [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [IMPACTS](#impacts) - Connects an [Application](#application) to other related assets, such as other [Application](#application), [DataAsset](#dataasset) or [DataElement](#dataelement)
+- [INVOLVES](#involves) - Connects a [BusinessProcess](#businessprocess) node to a [DataAsset](#dataasset) node or a  [Transformation](#transformation) node
+
+#### **Example** 
+
+``` cypher
+
+(ds:DataSet {
+    id: : 'ds1',
+    name: 'CustomerDataSet',
+    description: 'A dataset containing customer information’
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DataSteward
+
+Represents a person responsible for managing data assets and ensuring data quality and governance.
+
+#### **Properties**
+
+- id
+- name
+- email
+  
+#### **Relationships**
+
+- [RESPONSIBLE_FOR](#accountable_for) - Connects a [DataSteward](#datasteward) node to a [DataAsset](#dataasset) node
+
+#### **Example** 
+
+``` cypher
+
+(s:DataSteward {
+  id: 'steward1', 
+  name: 'Alice', 
+  email: 'alice@example.com'
+})
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### ProcessSteward
+
+Represents a person responsible for managing and ensuring the quality and governance of a business process.
+
+#### **Properties**
+
+- id
+- name
+- email
+
+### **Relationships**
+
+- [ACCOUNTABLE_FOR](#ACCOUNTABLE_FOR) - [ProcessSteward](#processsteward) node to a [SystemOfRecord](#systemofrecord) node 
+- [MANAGES_PROCESS](#MANAGES_PROCESS) - Connects a [ProcessSteward](#processsteward) node to a [BusinessProcess](#businessprocess) node
+
+#### **Example** 
+
+``` cypher
+
+(ps:ProcessSteward {
+    id: : 'psteward1',
+    name: 'Bob',
+    email: 'bob@example.com’
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### Regulation
+
+Represents specific regulatory requirements applicable to the financial services industry (e.g.,
+    GDPR,
+    MiFID II,
+    Dodd-Frank).
+
+#### **Properties**
+
+- id
+- name
+- description
+  
+#### **Relationships** 
+
+- [GOVERNED_BY](#governed_by) - Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [Regulation](#regulation) or [CompliancePolicy](#compliancepolicy)
+- [RESPONSIBLE_FOR](#responsible_for) - Connects a [ComplianceOfficer](#complianceofficer) to a [Regulation](#regulation), [CompliancePolicy](#compliancepolicy), or [DataAsset](#dataasset)
+
+#### **Example** 
+
+``` cypher
+
+(r:Regulation {
+    id: : 'r1',
+    name: 'GDPR',
+    description: 'General Data Protection Regulation'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### SystemOfRecord
+
+Represents the authoritative data source for a given data element or piece of information.
+
+#### **Properties**
+
+- id
+- name
+- description
+
+#### **Relationships** 
+
+- [ACCOUNTABLE_FOR](#accountable_for) - Connects a [SystemOfRecord](#systemofrecord) node to a [DataAsset](#dataasset) node
+
+#### **Example** 
+
+``` cypher
+
+(sor:SystemOfRecord {
+    id: 'sor1',
+    name: 'Customer Master Data',
+    description: 'Authoritative source for customer information'
+})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### Transformation
+
+Represents a data transformation process or job.
+
+#### **Properties**
+
+- id 
+- name 
+- description
+- type
+
+#### **Relationships** 
+
+- [GENERATED_BY](#generated_by)- Connects a [DataElement](#dataelement) node to a [Transformation](#transformation) node
+- [INVOLVES](#involves) - Connects a [BusinessProcess](#businessprocess) node to a [DataAsset](#dataasset) node or a  [Transformation](#transformation) node
+
+#### **Example** 
+
+``` cypher
+
+(t:Transformation {
+  identifier: 'job1', 
+  name: 'Data Cleansing Job', 
+  description: 'Cleans and prepares data for analysis', 
+  type: 'ETL'
+})
+
+```
+
+## Relationships
+
+/////////////////////////////////////////////////////////////////////////////
+
+### ACCOUNTABLE_FOR:
+
+Connects a [ProcessSteward](#processsteward) node to a [SystemOfRecord](#systemofrecord) node, indicating that the person is accountable for the authoritative data source.
+ 
+#### **Example** 
+
+``` cypher
+
+(ps:[ProcessSteward](#processsteward))-[:ACCOUNTABLE_FOR]->(sor:SystemOfRecord)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### AGGREGATES:
+
+Connects a [DataSet](#dataset) node to a [DataElement](#dataelement) or node, representing the aggregation of [DataElement](#dataelement)s for common use.  
+ 
+#### **Example** 
+
+``` cypher
+
+(ds:DataSet)-[:AGGREGATES]->(de:DataElement)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### APPLIES
+
+Connects a [DataQualityRule](#dataqualityrule) to a [DataAsset](#dataasset) or [DataElement](#dataelement), indicating that the rule applies to the specific data.
+ 
+#### **Example** 
+
+``` cypher
+
+(dqr:DataQualityRule)-[:APPLIES]->(d:DataAsset)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### AUTHORITATIVE_SOURCE
+
+Connects a [SystemOfRecord](#systemofrecord) node to a [DataAsset](#dataasset) node, indicating that the data asset is the authoritative source for specific data elements.
+ 
+#### **Example** 
+
+``` cypher
+
+(sor:SystemOfRecord)-[:AUTHORITATIVE_SOURCE]->(d:DataAsset)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### CLASSIFIED_AS
+
+Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [DataClassification](#dataclassification), indicating the security classification level of the specific data.
+ 
+#### **Example** 
+
+``` cypher
+
+(d:DataAsset)-[:CLASSIFIED_AS]->(dc:DataClassification)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### CONSUMED_BY
+
+Connects a [DataAsset](#dataasset) (source data) to an [Application](#application) or [BusinessProcess](#businessprocess) that consumes the data without creating or transforming it.
+ 
+#### **Example** 
+
+``` cypher
+
+(d:DataAsset {type: 'Table'})-[:CONSUMED_BY]->(a:Application)
+or
+ 
+#### **Example** 
+
+``` cypher
+
+(d:DataAsset {type: 'Table'})-[:CONSUMED_BY]->(bp:BusinessProcess)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### CONTAINS
+
+Connects a [DataAsset](#dataasset) node to a [DataElement](#dataelement) node.
+ 
+#### **Example** 
+
+``` cypher
+
+(d:DataAsset)-[:CONTAINS]->(de:DataElement)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### DERIVED_FROM
+
+Connects a [DataAsset](#dataasset) (representing the view) to another [DataAsset](#dataasset) (representing the source data), indicating that the view is derived from the source data.
+ 
+#### **Example** 
+
+``` cypher
+
+(v:DataAsset {type: 'View'})-[:DERIVED_FROM]->(d:DataAsset {type: 'Table'})
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### GENERATED_BY
+
+Connects a [DataElement](#dataelement) node to a [Transformation](#transformation) node, indicating that the field was generated by a particular transformation process.
+ 
+#### **Example** 
+
+``` cypher
+
+(de:DataElement)-[:GENERATED_BY]->(t:Transformation)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### GOVERNED_BY
+
+Connects a [DataAsset](#dataasset) or [DataElement](#dataelement) to a [Regulation](#regulation) or [CompliancePolicy](#compliancepolicy), indicating that the data is subject to specific regulatory requirements or policies.
+ 
+#### **Example** 
+
+``` cypher
+
+(d:DataAsset)-[:GOVERNED_BY]->(r:Regulation)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### HAS_ATTRIBUTE
+
+Connects a [BusinessTerm](#businessterm) node to a [BusinessAttribute](#businessattribute) node.
+ 
+#### **Example** 
+
+``` cypher
+
+(bt:BusinessTerm)-[:HAS_ATTRIBUTE]->(ba:BusinessAttribute)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### IMPACTS
+
+Connects an [Application](#application) to other related assets, such as other [Application](#application), [DataAsset](#dataasset) or [DataElement](#dataelement), to represent the influence or effect the [Application](#application) has on these assets, particularly when changes occur within the [Application](#application) .
+ 
+#### **Example** 
+
+``` cypher
+
+(a:Application)-[:IMPACTS]->(d:DataAsset {type: 'Table'})
+or
+ 
+#### **Example** 
+
+``` cypher
+
+(a:Application)-[:IMPACTS]->(de:DataElement)
+or
+ 
+#### **Example** 
+
+``` cypher
+
+(a1:Application)-[:IMPACTS]->(a2:Application)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### INVOLVES
+
+Connects a [BusinessProcess](#businessprocess) node to a [DataAsset](#dataasset) node or a [Transformation](#transformation) node, indicating that the process involves the use or modification of the data asset or transformation.
+ 
+#### **Example** 
+
+``` cypher
+
+(bp:BusinessProcess)-[:INVOLVES]->(d:DataAsset)
+ 
+#### **Example** 
+
+``` cypher
+
+(bp:BusinessProcess)-[:INVOLVES]->(t:Transformation)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### MANAGES_PROCESS
+
+Connects a [ProcessSteward](#processsteward) node to a [BusinessProcess](#businessprocess) node, indicating that the person is responsible for managing the business process.
+ 
+#### **Example** 
+
+``` cypher
+
+(ps:ProcessSteward)-[:MANAGES_PROCESS]->(bp:BusinessProcess)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### MAPS_TO
+
+Connects a [BusinessAttribute](#businessattribute) node to a [DataElement](#dataelement) node.
+ 
+#### **Example** 
+
+``` cypher
+
+(ba:BusinessAttribute)-[:MAPS_TO]->(de:DataElement)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### MEASURES
+
+Connects a [DataQualityMetric](#dataqualitymetric) to a [DataAsset](#dataasset) or [DataElement](#dataelement), indicating that the metric is used to measure the quality of the specific data.
+ 
+#### **Example** 
+
+``` cypher
+
+(dqm:DataQualityMetric)-[:MEASURES]->(d:DataAsset)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### RESPONSIBLE_FOR
+
+Connects a [ComplianceOfficer](#complianceofficer) to a [Regulation](#regulation), [CompliancePolicy](#compliancepolicy), or [DataAsset](#dataasset), indicating their responsibility for ensuring compliance.
+ 
+#### **Example** 
+
+``` cypher
+
+(co:ComplianceOfficer)-[:RESPONSIBLE_FOR]->(r:Regulation)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### TRANSFORMS_TO
+
+Connects a [[DataElement](#dataelement) node to another [DataElement](#dataelement) node, representing the transformation from one field to another in a data transformation process.
+ 
+#### **Example** 
+
+``` cypher
+
+(de1:DataElement)-[:TRANSFORMS_TO {transformationId: 'job1'}]->(de2:DataElement)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### UTILIZES
+
+Connects a [BusinessProcess](#businessprocess) to an [Application](#application) that is used to accomplish the process.
+
+#### **Example** 
+
+``` cypher
+
+(bp:BusinessProcess)-[:UTILIZES]->(a:Application)
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+
+### VIOLATES
+
+Connects a [DataQualityIssue](#dataqualityissue) to a [DataQualityRule](#DataQualityRule), [DataQualityMetric](#dataqualitymetric), [DataAsset](#dataasset), or [DataElement](#dataelement), indicating that the issue represents a violation of the rule or metric or is related to the specific data.
+ 
+#### **Example** 
+
+``` cypher
+
+(dqi:DataQualityIssue)-[:VIOLATES]->(dqr:DataQualityRule)
+
+
+```
+
+/////////////////////////////////////////////////////////////////////////////
+

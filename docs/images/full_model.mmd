@@ -1,0 +1,80 @@
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'background': '#f4f4f4'
+      'primaryColor': '#BB2528',
+      'primaryTextColor': '#fff',
+      'primaryBorderColor': '#7C0000',
+      'lineColor': '#F8B229',
+      'secondaryColor': '#006100',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+%%| label: fig-mermaid
+%%| fig-width: 7
+%%| fig-cap: |
+%%|   The complete model for data lineage that we can expand into when ready.  We will use a simplified version to start with
+%%|   We will use a simplified version to start with and improve as the qualtity of the data we have access to increases.
+%%| 
+graph LR
+subgraph "Full Model"
+    A[Application]:::entity
+    BA[BusinessAttribute]:::entity
+    BKA[BusinessKeyActivity]:::entity
+    BP[BusinessProcess]:::entity
+    BT[BusinessTerm]:::entity
+    CO[ComplianceOfficer]:::entity
+    CP[CompliancePolicy]:::entity
+    DC[DataClassification]:::entity
+    DE[DataElement]:::entity
+    DQI[DataQualityIssue]:::entity
+    DQM[DataQualityMetric]:::entity
+    DQR[DataQualityRule]:::entity
+    DS[DataSet]:::entity
+    LOB[LineOfBusiness]:::entity
+    PS[ProcessSteward]:::entity
+    R[Regulation]:::entity
+    SR[SystemOfRecord]:::entity
+    TLC[TradeLifecycle]:::entity
+
+  A --IMPACTS--> A
+  DS --CONSUMED_BY--> A
+  DS --CREATED_BY--> A
+  A --UTILIZES--> BP
+  BA --MAPS_TO--> DE
+  BA --PART_OF--> BT
+  BKA --PART_OF--> BP
+  BP --CONSUMED_BY--> DS
+  BP --CREATED_BY--> DS
+  BP --GOVERNED_BY--> CP
+  BP --GOVERNED_BY--> R
+  BP --HAS_STAGE--> TLC
+  CO --RESPONSIBLE_FOR--> CP
+  CO --RESPONSIBLE_FOR--> DS
+  CO --RESPONSIBLE_FOR--> R
+  CP --APPLIES_TO--> DS
+  CP --APPLIES_TO--> DE
+  CP --GOVERNED_BY--> R
+  DC --CLASSIFIED_AS--> DS
+  DE --BELONGS_TO--> DS
+  DE --GOVERNED_BY--> R
+  DE --MEASURES--> DQM
+  DE --VIOLATES--> DQI
+  DE --VIOLATES--> DQR
+  DE --VIOLATES--> DQM
+  DS --GOVERNED_BY--> R
+  DS --PRODUCES--> SR
+  DQM --VIOLATES--> DQI
+  DQM --VIOLATES--> DQR
+  DQI --VIOLATES--> DQR
+  DQR --APPLIES_TO--> DS
+  DQR --APPLIES_TO--> DE
+  LOB --CONTAINS--> BP
+  PS --RESPONSIBLE_FOR--> BP
+
+classDef entity fill:#f9f9f9,stroke:#333,stroke-width:1px;
+classDef relation fill:#EFEFEF,stroke:#666,stroke-width:1px;
+
+end
