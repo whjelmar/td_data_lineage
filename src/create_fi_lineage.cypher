@@ -250,27 +250,27 @@ CREATE (:DataElement {name: 'Work Flow Type'});
 CREATE (:DataElement {name: 'Zip Code'});
 
 // Create DataSets
-CREATE (:DataAsset {name: '100000 / 190000 Accounts'});
-CREATE (:DataAsset {name: '1000000 / 300000 Accounts'});
-CREATE (:DataAsset {name: '190000 / 100001 Accounts'});
-CREATE (:DataAsset {name: '400000 / 400100 Accounts'});
-CREATE (:DataAsset {name: 'Account Information'});
-CREATE (:DataAsset {name: 'BND TDS C/M'});
-CREATE (:DataAsset {name: 'BONY Settlement Instructions'});
-CREATE (:DataAsset {name: 'Counterparty Information'});
-CREATE (:DataAsset {name: 'Customer Account'});
-CREATE (:DataAsset {name: 'Delivery Instructions'});
-CREATE (:DataAsset {name: 'DTC Settlement Instructions'});
-CREATE (:DataAsset {name: 'EUROCLEAR Settlement Instructions'});
-CREATE (:DataAsset {name: 'FED Wire Settlement Instructions'});
-CREATE (:DataAsset {name: 'Group Account'});
-CREATE (:DataAsset {name: 'International Party'});
-CREATE (:DataAsset {name: 'Legal Entity Attributes'});
-CREATE (:DataAsset {name: 'Other Settlement Instructions'});
-CREATE (:DataAsset {name: 'Party Details'});
-CREATE (:DataAsset {name: 'Settlement Delivery Attributes'});
-CREATE (:DataAsset {name: 'Settlement Instructions'});
-CREATE (:DataAsset {name: 'Wire Settlement Instructions'});
+CREATE (:DataSet {name: '100000 / 190000 Accounts'});
+CREATE (:DataSet {name: '1000000 / 300000 Accounts'});
+CREATE (:DataSet {name: '190000 / 100001 Accounts'});
+CREATE (:DataSet {name: '400000 / 400100 Accounts'});
+CREATE (:DataSet {name: 'Account Information'});
+CREATE (:DataSet {name: 'BND TDS C/M'});
+CREATE (:DataSet {name: 'BONY Settlement Instructions'});
+CREATE (:DataSet {name: 'Counterparty Information'});
+CREATE (:DataSet {name: 'Customer Account'});
+CREATE (:DataSet {name: 'Delivery Instructions'});
+CREATE (:DataSet {name: 'DTC Settlement Instructions'});
+CREATE (:DataSet {name: 'EUROCLEAR Settlement Instructions'});
+CREATE (:DataSet {name: 'FED Wire Settlement Instructions'});
+CREATE (:DataSet {name: 'Group Account'});
+CREATE (:DataSet {name: 'International Party'});
+CREATE (:DataSet {name: 'Legal Entity Attributes'});
+CREATE (:DataSet {name: 'Other Settlement Instructions'});
+CREATE (:DataSet {name: 'Party Details'});
+CREATE (:DataSet {name: 'Settlement Delivery Attributes'});
+CREATE (:DataSet {name: 'Settlement Instructions'});
+CREATE (:DataSet {name: 'Wire Settlement Instructions'});
 
 //  Create LineOfBusiness -> BusinessProcess Relationships
 MATCH (l:LineOfBusiness), (b:BusinessProcess)
